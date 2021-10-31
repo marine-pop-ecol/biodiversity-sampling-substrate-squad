@@ -5,7 +5,7 @@ date: "31/10/2021"
 output: html_document
 ---
 
-QUESTION: How does substrate impact biodiveristy? - specifically types of rock - sand, pebble, cobble, boulder, or bedrock
+QUESTION: How does substrate impact sessile biodiversity in the intertidal? - specifically types of rock - sand, pebble, cobble, boulder, or bedrock
 
 SUMMARY OF DATA USED: We did our sampling at two different parallel transects in Scott's bay. The transects were taken during high tide on mostly pebble, cobble and boulder substratum. 
 
@@ -42,6 +42,7 @@ ordered_biodiversity = biodiversity %>%
 
 ordered_biodiversity
 
+#useless graph 
 ggplot(ordered_biodiversity, aes(x = abiotic_hab, y = n, fill = abiotic_hab)) + 
   geom_boxplot() +
   labs(y = "Number of individuals", x = "Substrate type")
@@ -52,11 +53,6 @@ ggplot(ordered_biodiversity, aes(x = abiotic_hab, y = n, fill = abiotic_hab)) +
 SUMMARY OF ANALYSIS TO ANSWER QUESTION:
 
 RESULTS AND CONCLUSIONS WITH GRAPHS AND FIGURES:
-
-
-
-
-
 
 
 
