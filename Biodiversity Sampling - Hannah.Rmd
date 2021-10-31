@@ -1,0 +1,72 @@
+---
+title: "Biodiversity Sampling - Hannah"
+author: "Hannah Levit"
+date: "31/10/2021"
+output: html_document
+---
+
+QUESTION: How does substrate impact biodiveristy? - specifically types of rock - sand, pebble, cobble, boulder, or bedrock
+
+SUMMARY OF DATA USED: We did our sampling at two different parallel transects in Scott's bay. The transects were taken during high tide on mostly pebble, cobble and boulder substratum. 
+
+```{r}
+
+biodiversity = read.csv("data-entry-final - biodiversity.csv")
+summary(biodiversity)
+view(biodiversity)
+
+percent_cover = read.csv("data-entry-final - percent-cover.csv")
+summary(percent_cover)
+
+quadrat_data = read.csv("data-entry-final - quadrat-data.csv")
+summary(quadrat_data)
+
+```
+
+
+POTENTIAL ANALYSIS:
+- plot species diversity and substrate type 
+n and abiotic_hab
+
+```{r}
+library(ggplot2)
+library(patchwork)
+library(tidyverse)
+
+ordered_biodiversity = biodiversity %>%
+  arrange(abiotic_hab)
+# find number of species per substrate type
+  
+# should the pebbles,cobble column be changed?
+
+
+ordered_biodiversity
+
+ggplot(ordered_biodiversity, aes(x = abiotic_hab, y = n, fill = abiotic_hab)) + 
+  geom_boxplot() +
+  labs(y = "Number of individuals", x = "Substrate type")
+
+```
+
+
+SUMMARY OF ANALYSIS TO ANSWER QUESTION:
+
+RESULTS AND CONCLUSIONS WITH GRAPHS AND FIGURES:
+
+
+
+
+
+
+
+
+SUBMIT: 
+1. A file containing your summary and analysis `group-summary.md` that includes:
+  a. Your hypothesis or question
+  b. Summary of data collection/ types of data used (1-2 sentences)
+  c. Summary of the analyses you did to answer your question (1-2 sentences)
+  d. Results and conclusions (1-2 sentences) with associated graphs and figures
+2. A folder called `images` where you save the images you make to `.png` files for the rest of your group to use. 
+  - when you create the plots from your data, you can save the plot using the code `ggsave([plot-name], here("./images/[file-name].png)` where the `[plot-name]` and `[file-name]` are what you have chosen to call your ggplot objects and the file you're writing out. 
+3. An `RProject` so your code is completely reproducible
+4. A knit pdf version of your `group-summary.md` file 
