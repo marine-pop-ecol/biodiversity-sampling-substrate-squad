@@ -1,0 +1,38 @@
+---
+title: "Field Sampling"
+author: "Paige Amos"
+date: "31/10/2021"
+output: pdf_document
+---
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+```{r}
+biodiversity = read_csv(here("./data/biodiversity.csv"))
+knitr::kable(biodiversity, caption = "Biodiversity of invertebrates on various substrates")
+```
+
+```{r}
+quad_biodiversity <- biodiversity %>%
+  drop_na(n) %>%
+  group_by(vertical_transect, quadrat) %>%
+  summarize(n_spp = length(unique(species)))
+
+species_biodiversity <- biodiversity %>%
+  drop_na(species, n) %>%
+  select(species, abiotic_hab) %>%
+  group_by(abiotic_hab) %>%
+  summarize(n_spp = length(unique(species)))
+  
+prop_biodiversity <- biodiversity %>%
+  drop_na(species,n) %>%
+  select(-c(species, n, biotic_hab)) %>%
+  group_by(vertical_transect, quadrat, square) %>%
+  summarize(proportion = )
+  
+```
+
+make boxplot of species richness for each substrate type
