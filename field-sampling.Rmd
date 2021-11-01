@@ -5,6 +5,10 @@ date: "31/10/2021"
 output: pdf_document
 ---
 
+QUESTION: How does substrate impact sessile biodiversity in the intertidal? - specifically types of rock - sand, pebble, cobble, boulder, or bedrock
+
+SUMMARY OF DATA USED: We did our sampling at two different parallel transects in Scott's bay. The transects were taken during high tide on mostly pebble, cobble and boulder substratum. 
+
 ```{r}
 library(tidyverse)
 library(here)
@@ -101,6 +105,7 @@ final_merged_data <- merge(merged_data_3, quad_species_count, all = TRUE, by = c
 
 make boxplot of species richness for each substrate type
 
+<<<<<<< HEAD
 ```{r}
 figure_data = final_merged_data %>%
   mutate(transect_quad = as.factor(transect_quad))
@@ -128,3 +133,10 @@ shannon_plot
   
 ```
 
+=======
+
+
+SUMMARY OF ANALYSIS TO ANSWER QUESTION:
+
+RESULTS AND CONCLUSIONS WITH GRAPHS AND FIGURES:
+>>>>>>> 519be3b57342b7da613e27caf0e0a82520ee2527
