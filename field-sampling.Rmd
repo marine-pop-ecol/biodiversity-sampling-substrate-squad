@@ -1,5 +1,5 @@
 ---
-title: "Field Sampling"
+title: "Field Sampling Final Code"
 author: "Paige Amos"
 date: "31/10/2021"
 output: pdf_document
@@ -73,28 +73,6 @@ merged_data_3 <- merge(merged_data_1, shannon_index)
 
 
 ```
-**WHAT IS THIS??**
-```{r}
-quad_biodiversity <- biodiversity %>%
-  drop_na(n) %>%
-  group_by(vertical_transect, quadrat) %>%
-  summarize(n_spp = length(unique(species)))
-
-species_biodiversity <- biodiversity %>%
-  drop_na(species, n) %>%
-  select(species, abiotic_hab) %>%
-  group_by(abiotic_hab) %>%
-  summarize(n_spp = length(unique(species)))
-  
-prop_biodiversity <- biodiversity %>%
-  drop_na(species,n) %>%
-  select(-c(species, n, biotic_hab)) %>%
-  group_by(vertical_transect, quadrat, square) %>%
-  summarize(proportion = )
-  
-```
-****
-
 
 #THIS IS THE FINAL DATASET TO MAKE FIGURES FROM#
 ```{r}
@@ -110,30 +88,41 @@ make boxplot of species richness for each substrate type
 figure_data = final_merged_data %>%
   mutate(transect_quad = as.factor(transect_quad))
 
-richness_plot <- ggplot(figure_data, aes(x = per_cobble, y = species_per_quad, fill = transect_quad)) +
-  geom_point(aes(colour = transect_quad, size = 2), position = position_jitterdodge()) +
-  theme_classic() +
+species_rich <- ggplot(figure_data, aes(x = per_cobble, y = species_per_quad, fill = transect_quad)) +
+  geom_point(aes(colour = transect_quad, size = 2)) +
+   stat_smooth(method = "lm", aes(fill = "transect_quad", colour = "black")) +
   xlab("Percent Cobbles (%)") +
   ylab("Species Richness") +
-  stat_smooth(method = "lm", aes(fill = transect_quad, colour = transect_quad))
+  theme_classic() +
+  theme(legend.position = "none")
+  
+species_rich
 
-richness_plot
 ```
 ```{r}
-shannon_plot <- ggplot(figure_data, aes(x = per_cobble, y = H, fill = transect_quad)) +
-  geom_point() +
-  geom_point(aes(colour = transect_quad, size = 2), position = position_jitterdodge()) +
+shannon_plot_cobble <- ggplot(figure_data, aes(x = per_cobble, y = H)) +
+  geom_point(aes(colour = transect_quad, size = 2)) +
   theme_classic() +
   xlab("Percent Cobbles (%)") +
   ylab("Shannon Wiener Index") +
-  stat_smooth(method = "lm", aes(fill = transect_quad, colour = transect_quad))
-
-shannon_plot
-```
+  stat_smooth(method = "lm", aes(fill = "transect_quad", colour = "black")) +
+  theme(legend.position = "none")
   
-```
 
-=======
+shannon_plot_cobble
+```
+```{r}
+shannon_plot_pebble <- ggplot(figure_data, aes(x = per_pebble, y = H)) +
+  geom_point(aes(colour = transect_quad, size = 2)) +
+  theme_classic() +
+  xlab("Percent Pebble (%)") +
+  ylab("Shannon Wiener Index") +
+  stat_smooth(method = "lm", aes(fill = "transect_quad", colour = "black")) +
+  theme(legend.position = "none")
+  
+
+shannon_plot_pebble
+```
 
 
 SUMMARY OF ANALYSIS TO ANSWER QUESTION:
