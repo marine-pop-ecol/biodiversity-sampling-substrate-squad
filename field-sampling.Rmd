@@ -124,8 +124,7 @@ shannon_plot_pebble <- ggplot(figure_data, aes(x = per_pebble, y = H)) +
 shannon_plot_pebble
 ```
 
-
 SUMMARY OF ANALYSIS TO ANSWER QUESTION:
 
 RESULTS AND CONCLUSIONS WITH GRAPHS AND FIGURES:
->>>>>>> 519be3b57342b7da613e27caf0e0a82520ee2527
+
