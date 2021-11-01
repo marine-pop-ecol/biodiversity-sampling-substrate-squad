@@ -35,30 +35,41 @@ quad_shannon <- biodiversity %>%
   group_by (vertical_transect, quadrat, species) %>%
   summarize(n_per_species = sum(n))
 
+#of occurrences per quadrat
+quad_occ_count <- biodiversity %>%
+  drop_na(species, n) %>%
+  group_by(vertical_transect, quadrat, species) %>%
+  summarize(occ_count_per_quadrat = n())
+
+#of species per quadrat
+quad_species_count <- quad_occ_count %>%
+  group_by(vertical_transect, quadrat) %>% 
+  summarize(species_per_quad = n())
+
 #total number of individuals of all species in quadrat found in the 10 squares
 quad_total <- biodiversity %>%
   drop_na(species, n) %>%
   group_by(vertical_transect, quadrat) %>%
   summarize(n_total_per_quadrat = sum(n))
 
-quad_shannon <- merge(quad_shannon, quad_total, all = TRUE, by = c('vertical_transect', 'quadrat'))
+quad_shannon_2 <- merge(quad_shannon, quad_total, all = TRUE, by = c('vertical_transect', 'quadrat'))
 
-quad_shannon <- quad_shannon %>%
+quad_shannon_3 <- quad_shannon_2 %>%
   drop_na(species) %>%
   mutate(p_i = n_per_species/n_total_per_quadrat) %>%
   mutate(Pi_lnPi = p_i*log(p_i))
 
 #calulating shannon wiener for each quadrat and adding to merged data
-shannon_index <- quad_shannon %>%
+shannon_index <- quad_shannon_3 %>%
   group_by(vertical_transect, quadrat) %>%
   summarize(H = -sum(Pi_lnPi))
 
 merged_data_2 <- merge(quad_shannon, cover)
-merged_data_3 <- merge(merged_data, shannon_index)
+merged_data_3 <- merge(merged_data_1, shannon_index)
 
 
 ```
-
+**WHAT IS THIS??**
 ```{r}
 quad_biodiversity <- biodiversity %>%
   drop_na(n) %>%
@@ -78,5 +89,42 @@ prop_biodiversity <- biodiversity %>%
   summarize(proportion = )
   
 ```
+****
+
+
+#THIS IS THE FINAL DATASET TO MAKE FIGURES FROM#
+```{r}
+final_merged_data <- merge(merged_data_3, quad_species_count, all = TRUE, by = c('vertical_transect', 'quadrat')) %>%
+  unite(transect_quad, vertical_transect, quadrat)
+
+```
 
 make boxplot of species richness for each substrate type
+
+```{r}
+figure_data = final_merged_data %>%
+  mutate(transect_quad = as.factor(transect_quad))
+
+richness_plot <- ggplot(figure_data, aes(x = per_cobble, y = species_per_quad, fill = transect_quad)) +
+  geom_point(aes(colour = transect_quad, size = 2), position = position_jitterdodge()) +
+  theme_classic() +
+  xlab("Percent Cobbles (%)") +
+  ylab("Species Richness") +
+  stat_smooth(method = "lm", aes(fill = transect_quad, colour = transect_quad))
+
+richness_plot
+```
+```{r}
+shannon_plot <- ggplot(figure_data, aes(x = per_cobble, y = H, fill = transect_quad)) +
+  geom_point() +
+  geom_point(aes(colour = transect_quad, size = 2), position = position_jitterdodge()) +
+  theme_classic() +
+  xlab("Percent Cobbles (%)") +
+  ylab("Shannon Wiener Index") +
+  stat_smooth(method = "lm", aes(fill = transect_quad, colour = transect_quad))
+
+shannon_plot
+```
+  
+```
+
