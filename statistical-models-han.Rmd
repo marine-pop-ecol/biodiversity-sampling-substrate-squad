@@ -70,9 +70,9 @@ final_merged_data <- merge(merged_data_3, quad_species_count, all = TRUE, by = c
   unite(transect_quad, vertical_transect, quadrat)
 ```
 
-make boxplot of species richness for each substrate type
 
 <<<<<<< HEAD
+# need figure caption
 ```{r}
 figure_data = final_merged_data %>%
   mutate(transect_quad = as.factor(transect_quad))
@@ -90,16 +90,11 @@ species.mod <- lm(per_cobble ~ species_per_quad, data = figure_data)
 summary(species.mod)
 
 ```
-Residuals:
-    Min      1Q  Median      3Q     Max 
--48.029 -23.614  -3.029  27.410  49.141 
-
 Coefficients:
                  Estimate Std. Error t value Pr(>|t|)    
 (Intercept)       22.2748     3.7617   5.921 7.52e-09 ***
 species_per_quad   8.5847     0.9938   8.638  < 2e-16 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Residual standard error: 28.58 on 356 degrees of freedom
 Multiple R-squared:  0.1733,	Adjusted R-squared:  0.171 
@@ -121,16 +116,11 @@ shannon_plot_cobble
 Hcobble.mod <- lm(per_cobble ~ H, data = figure_data)
 summary(Hcobble.mod)
 ```
-Residuals:
-    Min      1Q  Median      3Q     Max 
--51.801 -20.985  -4.419  23.954  47.256 
-
 Coefficients:
             Estimate Std. Error t value Pr(>|t|)    
 (Intercept)   56.046      4.101   13.67   <2e-16 ***
 H             -4.721      4.413   -1.07    0.285    
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Residual standard error: 31.38 on 356 degrees of freedom
 Multiple R-squared:  0.003205,	Adjusted R-squared:  0.0004052 
@@ -152,16 +142,12 @@ Hpebble.mod <- lm(per_pebble ~ H, data = figure_data)
 summary(Hpebble.mod)
 
 ```
-Residuals:
-    Min      1Q  Median      3Q     Max 
--21.283 -16.412   2.113  12.408  30.752 
 
 Coefficients:
             Estimate Std. Error t value Pr(>|t|)    
 (Intercept)    4.255      2.122   2.006   0.0457 *  
 H             17.384      2.283   7.614 2.42e-13 ***
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Residual standard error: 16.24 on 356 degrees of freedom
 Multiple R-squared:   0.14,	Adjusted R-squared:  0.1376 
@@ -171,4 +157,4 @@ F-statistic: 57.97 on 1 and 356 DF,  p-value: 2.42e-13
 
 SUMMARY OF ANALYSIS TO ANSWER QUESTION:
 
-RESULTS AND CONCLUSIONS WITH GRAPHS AND FIGURES:
+RESULTS AND CONCLUSIONS:
