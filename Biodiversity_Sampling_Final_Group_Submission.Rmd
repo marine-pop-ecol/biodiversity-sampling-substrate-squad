@@ -1,0 +1,185 @@
+---
+title: "Biodiversity_Sampling_Final_Group_Submission"
+author: "Lucy, Hannah, Gena, Paige"
+date: "01/11/2021"
+output: pdf_document
+---
+\newpage
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(here)
+```
+
+#Loading in data:
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+biodiversity = read_csv(here("./data/biodiversity.csv"))
+knitr::kable(biodiversity, caption = "Biodiversity of invertebrates on various substrates")
+
+cover = read_csv(here("./data/cover.csv"))
+knitr::kable(biodiversity, caption = "Cover data")
+
+quadrat = read_csv(here("./data/quadrat.csv"))
+knitr::kable(biodiversity, caption = "Quadrat data")
+```
+
+#Organizing data & making new columns:
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+merged_data_1 = merge(biodiversity, cover)
+head(merged_data_1)
+
+merged_data_1 <- merged_data_1 %>%
+  select(-c(biotic_hab, per_mussel, per_barnacle, per_upright, per_crust, num_snail, num_crab))
+
+
+#number of individuals per species in the 10 squares
+quad_shannon <- biodiversity %>%
+  drop_na(n) %>%
+  group_by (vertical_transect, quadrat, species) %>%
+  summarize(n_per_species = sum(n))
+
+#of occurrences per quadrat
+quad_occ_count <- biodiversity %>%
+  drop_na(species, n) %>%
+  group_by(vertical_transect, quadrat, species) %>%
+  summarize(occ_count_per_quadrat = n())
+
+#of species per quadrat
+quad_species_count <- quad_occ_count %>%
+  group_by(vertical_transect, quadrat) %>% 
+  summarize(species_per_quad = n())
+
+#total number of individuals of all species in quadrat found in the 10 squares
+quad_total <- biodiversity %>%
+  drop_na(species, n) %>%
+  group_by(vertical_transect, quadrat) %>%
+  summarize(n_total_per_quadrat = sum(n))
+
+quad_shannon_2 <- merge(quad_shannon, quad_total, all = TRUE, by = c('vertical_transect', 'quadrat'))
+
+quad_shannon_3 <- quad_shannon_2 %>%
+  drop_na(species) %>%
+  mutate(p_i = n_per_species/n_total_per_quadrat) %>%
+  mutate(Pi_lnPi = p_i*log(p_i))
+
+#calulating shannon wiener for each quadrat and adding to merged data
+shannon_index <- quad_shannon_3 %>%
+  group_by(vertical_transect, quadrat) %>%
+  summarize(H = -sum(Pi_lnPi))
+
+merged_data_2 <- merge(quad_shannon, cover)
+merged_data_3 <- merge(merged_data_1, shannon_index)
+
+```
+
+#Then we organize the final dataset by merging the above
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+final_merged_data <- merge(merged_data_3, quad_species_count, all = TRUE, by = c('vertical_transect', 'quadrat')) %>%
+  unite(transect_quad, vertical_transect, quadrat)
+
+```
+
+```{r}
+figure_data = final_merged_data %>%
+  mutate(transect_quad = as.factor(transect_quad))
+species_rich <- ggplot(figure_data, aes(x = per_cobble, y = species_per_quad, fill = transect_quad)) +
+  geom_point(aes(colour = transect_quad, size = 2)) +
+   stat_smooth(method = "lm", aes(fill = "transect_quad", colour = "black")) +
+  xlab("Percent Cobbles (%)") +
+  ylab("Species Richness") +
+  theme_classic() +
+  theme(legend.position = "none")
+  
+species_rich
+
+ggsave(here("./images/species_richness_cobble.png"), species_rich)
+
+species.mod <- lm(per_cobble ~ species_per_quad, data = figure_data)
+summary(species.mod)
+
+```
+#p = 2e-16, significant
+
+```{r}
+shannon_plot_cobble <- ggplot(figure_data, aes(x = per_cobble, y = H)) +
+  geom_point(aes(colour = transect_quad, size = 2)) +
+  theme_classic() +
+  xlab("Percent Cobbles (%)") +
+  ylab("Shannon Wiener Index") +
+  stat_smooth(method = "lm", aes(fill = "transect_quad", colour = "black")) +
+  theme(legend.position = "none")
+  
+shannon_plot_cobble
+
+ggsave(here("./images/shannon_plot_cobble.png"), shannon_plot_cobble)
+
+Hcobble.mod <- lm(per_cobble ~ H, data = figure_data)
+summary(Hcobble.mod)
+```
+#p = 0.285, not significant
+
+```{r}
+shannon_plot_pebble <- ggplot(figure_data, aes(x = per_pebble, y = H)) +
+  geom_point(aes(colour = transect_quad, size = 2)) +
+  theme_classic() +
+  xlab("Percent Pebble (%)") +
+  ylab("Shannon Wiener Index") +
+  stat_smooth(method = "lm", aes(fill = "transect_quad", colour = "black")) +
+  theme(legend.position = "none")
+  
+shannon_plot_pebble
+
+ggsave(here("./images/shannon_plot_pebble.png"), shannon_plot_pebble)
+
+Hpebble.mod <- lm(per_pebble ~ H, data = figure_data)
+summary(Hpebble.mod)
+
+```
+#p-value = 2.42e-13, significant
+
+
+\newpage
+##*Question*##
+Does substrate type impact sessile invertebrate biodiversity in the intertidal zone?
+
+Specifically, how does percent cobble cover impact species richness in each quadrat?, how does percent cobble cover impact the Shannon Wiener Index in each quadrat?, and how does percent pebble cover impact the shannon Wiender index in each quadrat?
+
+##*Data Collection*##
+We sampled our data at Scott's Bay, BC using transect tapes parallel to the shoreline and quadrats that were placed haphazardly along six vertical transects. Measurements were taken during a high low tide at two different elevations across exposed and sheltered sides of the bay, and species counts and percent biotic and abiotic cover was recorded for randomly selected squares in each quadrat. 
+
+##*Summary of Analysis*##
+We manipulated and organized our csv datasets in R studio to create a csv that included all data needed to create our figures. To answer our question we calculated species richness and Shannon Wiener Index for each quadrat, and then performed linear regression models to test the significance of our findings.
+
+| **Parameters**                         |   **p-value** | **Adjusted R-squared** |
+| -------------------------------------  | ------------  | ---------------------- |
+| Percent cobble vs Species Richness     |  < 2.2e-16    |    0.171           |
+| Percent cobble vs Shannon Weiner Index |   0.2854    |    0.0004052             |
+| Percent pebble vs Shannon Weiner Index |  2.42e-13    |    0.1376               |
+
+##*Results & Conclusions*##0.2854
+We first plotted the species richness versus percent boulder cover in each quadrat, finding that boulder cover did significantly impact species richness in a positive correlation.
+```{r}
+species_rich
+```
+**Figure 1**: Species richness is the response variable plotted against percent cobbles, which serves as the explanatory variable. The colours represent different quadrats along our transects. The linear trendline was added and we found an adjusted $R^2$ of 0.171 and a p-value of < 2.2e-16.
+
+Then we plotted two figures for biodiversity (Shannon Wiener index) versus percent boulder and percent pebble cover, respectively, finding that cobble cover did not significantly impact biodiversity but pebble cover did have a significant positive correlation. 
+```{r}
+#for percent cobble
+shannon_plot_cobble
+```
+**Figure 2**: The Shannon Weiner Index is the response variable plotted against percent cobbles, which serves as the explanatory variable. The colours represent different quadrats along our transects. The linear trendline was added and we found an adjusted $R^2$ of 0.0004052  and a p-value of 0.2854.
+
+
+```{r}
+#for percent pebble
+shannon_plot_pebble
+```
+**Figure 3**: The Shannon Weiner Index is the response variable plotted against percent pebble, which serves as the explanatory variable. The colours represent different quadrats along our transects. The linear trendline was added and we found an adjusted $R^2$ of 0.1376 and a p-value of 2.42e-13.
+
+
+
+
