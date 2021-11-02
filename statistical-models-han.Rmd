@@ -1,8 +1,8 @@
 ---
-title: "Field Sampling Final Code"
-author: "Paige Amos"
-date: "31/10/2021"
-output: pdf_document
+title: "copy of graphs"
+author: "Hannah Levit"
+date: "01/11/2021"
+output: html_document
 ---
 
 QUESTION: How does substrate impact sessile biodiversity in the intertidal? - specifically types of rock - sand, pebble, cobble, boulder, or bedrock
@@ -12,15 +12,17 @@ SUMMARY OF DATA USED: We did our sampling at two different parallel transects in
 ```{r}
 library(tidyverse)
 library(here)
+library(FSA) 
+library(fGarch)
+library(LambertW)
+library(patchwork)
 ```
 
 ```{r}
-biodiversity = read_csv(here("./data/biodiversity.csv"))
+biodiversity = read_csv(here(".data/biodiversity.csv"))
 knitr::kable(biodiversity, caption = "Biodiversity of invertebrates on various substrates")
-
 cover = read_csv(here("./data/cover.csv"))
 knitr::kable(biodiversity, caption = "Cover data")
-
 quadrat = read_csv(here("./data/quadrat.csv"))
 knitr::kable(biodiversity, caption = "Quadrat data")
 ```
@@ -28,57 +30,44 @@ knitr::kable(biodiversity, caption = "Quadrat data")
 ```{r}
 merged_data_1 = merge(biodiversity, cover)
 head(merged_data_1)
-
 merged_data_1 <- merged_data_1 %>%
   select(-c(biotic_hab, per_mussel, per_barnacle, per_upright, per_crust, num_snail, num_crab))
-
-
 #number of individuals per species in the 10 squares
 quad_shannon <- biodiversity %>%
   drop_na(n) %>%
   group_by (vertical_transect, quadrat, species) %>%
   summarize(n_per_species = sum(n))
-
 #of occurrences per quadrat
 quad_occ_count <- biodiversity %>%
   drop_na(species, n) %>%
   group_by(vertical_transect, quadrat, species) %>%
   summarize(occ_count_per_quadrat = n())
-
 #of species per quadrat
 quad_species_count <- quad_occ_count %>%
   group_by(vertical_transect, quadrat) %>% 
   summarize(species_per_quad = n())
-
 #total number of individuals of all species in quadrat found in the 10 squares
 quad_total <- biodiversity %>%
   drop_na(species, n) %>%
   group_by(vertical_transect, quadrat) %>%
   summarize(n_total_per_quadrat = sum(n))
-
 quad_shannon_2 <- merge(quad_shannon, quad_total, all = TRUE, by = c('vertical_transect', 'quadrat'))
-
 quad_shannon_3 <- quad_shannon_2 %>%
   drop_na(species) %>%
   mutate(p_i = n_per_species/n_total_per_quadrat) %>%
   mutate(Pi_lnPi = p_i*log(p_i))
-
 #calulating shannon wiener for each quadrat and adding to merged data
 shannon_index <- quad_shannon_3 %>%
   group_by(vertical_transect, quadrat) %>%
   summarize(H = -sum(Pi_lnPi))
-
 merged_data_2 <- merge(quad_shannon, cover)
 merged_data_3 <- merge(merged_data_1, shannon_index)
-
-
 ```
 
 #THIS IS THE FINAL DATASET TO MAKE FIGURES FROM#
 ```{r}
 final_merged_data <- merge(merged_data_3, quad_species_count, all = TRUE, by = c('vertical_transect', 'quadrat')) %>%
   unite(transect_quad, vertical_transect, quadrat)
-
 ```
 
 make boxplot of species richness for each substrate type
@@ -87,7 +76,6 @@ make boxplot of species richness for each substrate type
 ```{r}
 figure_data = final_merged_data %>%
   mutate(transect_quad = as.factor(transect_quad))
-
 species_rich <- ggplot(figure_data, aes(x = per_cobble, y = species_per_quad, fill = transect_quad)) +
   geom_point(aes(colour = transect_quad, size = 2)) +
    stat_smooth(method = "lm", aes(fill = "transect_quad", colour = "black")) +
@@ -98,7 +86,27 @@ species_rich <- ggplot(figure_data, aes(x = per_cobble, y = species_per_quad, fi
   
 species_rich
 
+species.mod <- lm(per_cobble ~ species_per_quad, data = figure_data)
+summary(species.mod)
+
 ```
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-48.029 -23.614  -3.029  27.410  49.141 
+
+Coefficients:
+                 Estimate Std. Error t value Pr(>|t|)    
+(Intercept)       22.2748     3.7617   5.921 7.52e-09 ***
+species_per_quad   8.5847     0.9938   8.638  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 28.58 on 356 degrees of freedom
+Multiple R-squared:  0.1733,	Adjusted R-squared:  0.171 
+F-statistic: 74.61 on 1 and 356 DF,  p-value: < 2.2e-16
+## SHE IS SIGNIFICANT
+
+
 ```{r}
 shannon_plot_cobble <- ggplot(figure_data, aes(x = per_cobble, y = H)) +
   geom_point(aes(colour = transect_quad, size = 2)) +
@@ -108,9 +116,27 @@ shannon_plot_cobble <- ggplot(figure_data, aes(x = per_cobble, y = H)) +
   stat_smooth(method = "lm", aes(fill = "transect_quad", colour = "black")) +
   theme(legend.position = "none")
   
-
 shannon_plot_cobble
+
+Hcobble.mod <- lm(per_cobble ~ H, data = figure_data)
+summary(Hcobble.mod)
 ```
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-51.801 -20.985  -4.419  23.954  47.256 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   56.046      4.101   13.67   <2e-16 ***
+H             -4.721      4.413   -1.07    0.285    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 31.38 on 356 degrees of freedom
+Multiple R-squared:  0.003205,	Adjusted R-squared:  0.0004052 
+F-statistic: 1.145 on 1 and 356 DF,  p-value: 0.2854
+## SHE IS NOT SIGNIFICANT
+
 ```{r}
 shannon_plot_pebble <- ggplot(figure_data, aes(x = per_pebble, y = H)) +
   geom_point(aes(colour = transect_quad, size = 2)) +
@@ -120,11 +146,29 @@ shannon_plot_pebble <- ggplot(figure_data, aes(x = per_pebble, y = H)) +
   stat_smooth(method = "lm", aes(fill = "transect_quad", colour = "black")) +
   theme(legend.position = "none")
   
-
 shannon_plot_pebble
+
+Hpebble.mod <- lm(per_pebble ~ H, data = figure_data)
+summary(Hpebble.mod)
+
 ```
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-21.283 -16.412   2.113  12.408  30.752 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    4.255      2.122   2.006   0.0457 *  
+H             17.384      2.283   7.614 2.42e-13 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 16.24 on 356 degrees of freedom
+Multiple R-squared:   0.14,	Adjusted R-squared:  0.1376 
+F-statistic: 57.97 on 1 and 356 DF,  p-value: 2.42e-13
+## SHE IS SIGNIFICANT
+
 
 SUMMARY OF ANALYSIS TO ANSWER QUESTION:
 
 RESULTS AND CONCLUSIONS WITH GRAPHS AND FIGURES:
-

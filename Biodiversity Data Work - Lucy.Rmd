@@ -1,0 +1,38 @@
+---
+title: "Biodiversity Data Work"
+author: "Lucy Wall"
+date: "31/10/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(popbio)
+```
+```{r}
+percent_cover_data <- read.csv("data-entry-final - percent-cover.csv")
+biodiversity_data <- read.csv("data-entry-final - biodiversity.csv")
+```
+
+#Species richness in each quadrat
+- assign each quadrat a substrate type (whichever has highest percent cover)
+- counting total number of species found in each quadrat
+- box plot with dots, species richness graphed against substrate category 
+
+
+
+#Shannon Biodiversity Index in each quadrat
+- calculate proportions of species
+  - #individuals of a species = (count in square*10) + (count in another square *10) **(DO THIS TO SUM ALL SQUARES THAT HAVE THE SAME SPECIES)
+  - total #individuals in quadrat (sum of all #individuals of a species)
+  - proportions = #of individuals of a species/ (total #individuals in quadrat)
+  
+-Shannon Wiener Index
+  - H = -SUM(proportion of species * ln(proportion of species))
+  
+***graph by percent cobble in each quadrat***
+  
